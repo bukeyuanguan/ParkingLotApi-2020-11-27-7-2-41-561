@@ -28,6 +28,13 @@ namespace ParkingLotApi.Controllers
             return Ok(parkingLotDto);
         }
 
+        [HttpGet]
+        public async Task<ActionResult<List<ParkingLotDto>>> GetAll()
+        {
+            var parkingLotDto = await this.parkingLotService.GetAll();
+            return Ok(parkingLotDto);
+        }
+
         [HttpPost]
         public async Task<ActionResult<ParkingLotDto>> Add(ParkingLotDto parkingLotDto)
         {
