@@ -15,4 +15,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Migration\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
 </Project>
