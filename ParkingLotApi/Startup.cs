@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ParkingLotApi.Repository;
+using ParkingLotApi.Services;
 
 namespace ParkingLotApi
 {
@@ -29,6 +30,7 @@ namespace ParkingLotApi
         {
             services.AddControllers();
             services.AddSwaggerGen();
+            services.AddScoped<ParkingLotService>();
             services.AddDbContext<ParkingLotDbContext>(options =>
             {
                 options.UseMySql(Configuration.GetConnectionString("Default"));
@@ -47,10 +49,10 @@ namespace ParkingLotApi
             {
                 using (var context = scope.ServiceProvider.GetService<ParkingLotDbContext>())
                 {
-                    if (context.Database.ProviderName.ToLower().Contains("mysql"))
-                    {
-                         context.Database.Migrate();
-                    }
+                    //if (context.Database.ProviderName.ToLower().Contains("mysql"))
+                    //{
+                    //     context.Database.Migrate();
+                    //}
                 }
             }
 
