@@ -103,6 +103,19 @@ namespace ParkingLotApiTest.ControllerTest
             ParkingLotService parkingLotService = new ParkingLotService(context);
             await parkingLotService.AddParkingLot(parkingLotDto1);
             Assert.Equal(1, context.ParkingLots.Count());
+        }
+
+        [Fact]
+        public async Task Should_not_add_parkingLot_when_name_already_exist_via_service()
+        {
+            var scope = Factory.Services.CreateScope();
+            var scopedServices = scope.ServiceProvider;
+
+            ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            context.ParkingLots.RemoveRange(context.ParkingLots);
+            context.SaveChanges();
+            ParkingLotService parkingLotService = new ParkingLotService(context);
+            await parkingLotService.AddParkingLot(parkingLotDto1);
             await parkingLotService.AddParkingLot(parkingLotDto1);
             Assert.Equal(1, context.ParkingLots.Count());
         }
