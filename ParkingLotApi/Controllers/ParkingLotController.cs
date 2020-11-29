@@ -52,6 +52,11 @@ namespace ParkingLotApi.Controllers
         public async Task<ActionResult<ParkingLotDto>> Add(ParkingLotDto parkingLotDto)
         {
             var name = await this.parkingLotService.AddParkingLot(parkingLotDto);
+            if (name == string.Empty)
+            {
+                return Conflict();
+            }
+
             return CreatedAtAction(nameof(GetByName), new { name = name }, parkingLotDto);
             //return parkingLotDto;
         }

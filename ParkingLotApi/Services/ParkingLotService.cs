@@ -70,11 +70,16 @@ namespace ParkingLotApi.Services
 
         public async Task<string> AddParkingLot(ParkingLotDto parkingLotDto)
         {
-            ParkingLotEntity parkingLotEntity = new ParkingLotEntity(parkingLotDto);
+            ParkingLotEntity newParkingLotEntity = new ParkingLotEntity(parkingLotDto);
+            var isNameExist = this.parkingLotDbContext.ParkingLots.Any(parkingLotEntity => parkingLotEntity.Name == newParkingLotEntity.Name);
+            if (isNameExist)
+            {
+                return string.Empty;
+            }
 
-            await this.parkingLotDbContext.ParkingLots.AddAsync(parkingLotEntity);
+            await this.parkingLotDbContext.ParkingLots.AddAsync(newParkingLotEntity);
             await this.parkingLotDbContext.SaveChangesAsync();
-            return parkingLotEntity.Name;
+            return newParkingLotEntity.Name;
         }
 
         public async Task DeleteParkingLot(string name)
