@@ -32,16 +32,12 @@ namespace ParkingLotApi.Services
                 .Include(parkingLot => parkingLot.Cars)
                 .Include(parkingLot => parkingLot.Orders)
                 .FirstOrDefaultAsync(parkingLotEntity => parkingLotEntity.Name == name);
-            return new ParkingLotDto(foundParkingLotEntity);
-        }
-        
-        public async Task<string> AddParkingLot(ParkingLotDto parkingLotDto)
-        {
-            ParkingLotEntity parkingLotEntity = new ParkingLotEntity(parkingLotDto);
+            if (foundParkingLotEntity == null)
+            {
+                return null;
+            }
 
-            await this.parkingLotDbContext.ParkingLots.AddAsync(parkingLotEntity);
-            await this.parkingLotDbContext.SaveChangesAsync();
-            return parkingLotEntity.Name;
+            return new ParkingLotDto(foundParkingLotEntity);
         }
 
         public async Task<ParkingLotDto> UpdateParkingLot(string name, UpdateParkingLotDto updateParkingLotDto)
@@ -52,6 +48,28 @@ namespace ParkingLotApi.Services
                 .FirstOrDefaultAsync(parkingLotEntity => parkingLotEntity.Name == name);
             foundParkingLotEntity.Capacity = updateParkingLotDto.Capacity;
             return new ParkingLotDto(foundParkingLotEntity);
+        }
+
+        public async Task<List<ParkingLotDto>> GetByPageSizeAndIndex(int? pageSize, int? pageIndex)
+        {
+            var allParkingLot = await this.parkingLotDbContext.ParkingLots
+               .Include(parkingLot => parkingLot.Cars)
+               .Include(parkingLot => parkingLot.Orders).ToListAsync();
+            var foundParkingLots = allParkingLot.Where((parkingLotEntity, index) =>
+               (pageSize == null || (pageIndex == null ||
+               (index >= pageSize * (pageIndex - 1) &&
+               index < pageSize * pageIndex))));
+            return foundParkingLots.Select(parkingLotEntity => new ParkingLotDto(parkingLotEntity)).ToList();
+           // return new List<ParkingLotDto> { new ParkingLotDto(allParkingLot[0] };
+        }
+
+        public async Task<string> AddParkingLot(ParkingLotDto parkingLotDto)
+        {
+            ParkingLotEntity parkingLotEntity = new ParkingLotEntity(parkingLotDto);
+
+            await this.parkingLotDbContext.ParkingLots.AddAsync(parkingLotEntity);
+            await this.parkingLotDbContext.SaveChangesAsync();
+            return parkingLotEntity.Name;
         }
 
         public async Task DeleteParkingLot(string name)

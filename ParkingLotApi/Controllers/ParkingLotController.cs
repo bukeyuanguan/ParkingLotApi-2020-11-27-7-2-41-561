@@ -25,14 +25,27 @@ namespace ParkingLotApi.Controllers
         public async Task<ActionResult<ParkingLotDto>> GetByName(string name)
         {
             var parkingLotDto = await this.parkingLotService.GetByName(name);
+            if (parkingLotDto == null)
+            {
+                return NotFound();
+            }
+
             return Ok(parkingLotDto);
         }
 
+        //[HttpGet]
+        //public async Task<ActionResult<List<ParkingLotDto>>> GetAll()
+        //{
+        //    var parkingLotDto = await this.parkingLotService.GetAll();
+        //    return Ok(parkingLotDto);
+        //}
+
         [HttpGet]
-        public async Task<ActionResult<List<ParkingLotDto>>> GetAll()
+        public async Task<ActionResult<List<ParkingLotDto>>> GetXParkingLotsInPageY(int? pageSize, int? pageIndex)
         {
-            var parkingLotDto = await this.parkingLotService.GetAll();
-            return Ok(parkingLotDto);
+            //var parkingLotDto = await this.parkingLotService.GetByName("IBM");
+            var parkingLotsList = await this.parkingLotService.GetByPageSizeAndIndex(pageSize, pageIndex);
+            return Ok(parkingLotsList);
         }
 
         [HttpPost]
@@ -47,8 +60,8 @@ namespace ParkingLotApi.Controllers
         public async Task<ActionResult<ParkingLotDto>> UpdateByName(string name, UpdateParkingLotDto updateParkingLotDto)
         {
             var parkingLotDto = await this.parkingLotService.UpdateParkingLot(name, updateParkingLotDto);
-            return CreatedAtAction(nameof(GetByName), new { name = name }, parkingLotDto);
-            //return NoContent();
+           // return CreatedAtAction(nameof(GetByName), new { name = name }, parkingLotDto);
+            return Ok(parkingLotDto);
         }
 
         [HttpDelete("{name}")]
