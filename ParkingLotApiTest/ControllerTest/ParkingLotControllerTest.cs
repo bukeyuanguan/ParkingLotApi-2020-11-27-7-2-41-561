@@ -20,6 +20,8 @@ namespace ParkingLotApiTest.ControllerTest
         private ParkingLotDto parkingLotDto2;
         private OrderDto orderDto1;
         private OrderDto orderDto2;
+        private CarDto carDto1;
+        private CarDto carDto2;
         private HttpClient client;
         public ParkingLotControllerTest(CustomWebApplicationFactory<Startup> factory) : base(factory)
         {
@@ -66,11 +68,21 @@ namespace ParkingLotApiTest.ControllerTest
                 CloseTime = "2020-12-17 15:15:30",
                 OrderStatus = "open",
             };
+            var carDto1 = new CarDto()
+            {
+                PlateNumber = "NP5032",
+            };
+            var carDto2 = new CarDto()
+            {
+                PlateNumber = "KW4262",
+            };
 
             this.parkingLotDto1 = parkingLotDto1;
             this.parkingLotDto2 = parkingLotDto2;
             this.orderDto1 = orderDto1;
             this.orderDto2 = orderDto2;
+            this.carDto1 = carDto1;
+            this.carDto2 = carDto2;
         }
 
         [Fact]
@@ -197,6 +209,22 @@ namespace ParkingLotApiTest.ControllerTest
             var addReturn2 = await parkingLotService.AddParkingLot(parkingLotDto2);
             var getAllReturn = await parkingLotService.GetByPageSizeAndIndex(1, 1);
             Assert.Equal(1, getAllReturn.Count);
+        }
+
+        [Fact]
+        public async Task Should_add_car_successfully_when_position_available_via_service()
+        {
+            var scope = Factory.Services.CreateScope();
+            var scopedServices = scope.ServiceProvider;
+
+            ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            context.Orders.RemoveRange(context.Orders);
+            context.SaveChanges();
+            ParkingLotService parkingLotService = new ParkingLotService(context);
+            CarService carService = new CarService(context);
+            var addParkingLotReturn = await parkingLotService.AddParkingLot(parkingLotDto1);
+            await carService.AddCar(addParkingLotReturn, carDto1);
+            Assert.Equal(1, context.Cars.Count());
         }
 
         [Fact]
