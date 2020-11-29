@@ -138,7 +138,7 @@ namespace ParkingLotApiTest.ControllerTest
         }
 
         [Fact]
-        public async Task Should_Delete_Company_Successfully_Via_Service()
+        public async Task Should_delete_parkigLot_successfully_when_can_find_by_name_via_service()
         {
             var scope = Factory.Services.CreateScope();
             var scopedServices = scope.ServiceProvider;
@@ -150,6 +150,23 @@ namespace ParkingLotApiTest.ControllerTest
             var addReturn = await parkingLotService.AddParkingLot(parkingLotDto1);
             await parkingLotService.DeleteParkingLot(addReturn);
             Assert.Equal(0, context.ParkingLots.Count());
+        }
+
+        [Fact]
+        public async Task Should_not_delete_parkingLot_when_can_not_find_by_name_via_service()
+        {
+            var scope = Factory.Services.CreateScope();
+            var scopedServices = scope.ServiceProvider;
+
+            ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            ParkingLotService parkingLotService = new ParkingLotService(context);
+            context.ParkingLots.RemoveRange(context.ParkingLots);
+            context.SaveChanges();
+            var addReturn1 = await parkingLotService.AddParkingLot(parkingLotDto1);
+            var addReturn2 = await parkingLotService.AddParkingLot(parkingLotDto2);
+            await parkingLotService.DeleteParkingLot(addReturn1);
+            await parkingLotService.DeleteParkingLot(addReturn1);
+            Assert.Equal(1, context.ParkingLots.Count());
         }
 
         [Fact]
