@@ -25,7 +25,7 @@ namespace ParkingLotApi.Services
                 .FirstOrDefaultAsync(parkingLotEntity => parkingLotEntity.Name == name);
             if (foundParkingLotEntity != null)
             {
-                var leftPosition = foundParkingLotEntity.Capacity - foundParkingLotEntity.Cars.Count;
+                var leftPosition = foundParkingLotEntity.Capacity - this.parkingLotDbContext.Cars.Count();
                 if (leftPosition > 0)
                 {
                     CarEntity newCarEntity = new CarEntity(carDto);

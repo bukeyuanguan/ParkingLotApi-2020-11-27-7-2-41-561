@@ -31,7 +31,7 @@ namespace ParkingLotApiTest.ControllerTest
             ParkingLotDto parkingLotDto1 = new ParkingLotDto();
             parkingLotDto1.Name = "IBM";
             parkingLotDto1.Locatoin = "Xizhimen";
-            parkingLotDto1.Capacity = 20;
+            parkingLotDto1.Capacity = 1;
             parkingLotDto1.Cars = new List<CarDto>()
             {
             };
@@ -42,7 +42,7 @@ namespace ParkingLotApiTest.ControllerTest
             ParkingLotDto parkingLotDto2 = new ParkingLotDto();
             parkingLotDto2.Name = "SUN";
             parkingLotDto2.Locatoin = "zhongguancun";
-            parkingLotDto1.Capacity = 30;
+            parkingLotDto2.Capacity = 1;
             parkingLotDto2.Cars = new List<CarDto>()
             {
             };
@@ -224,6 +224,23 @@ namespace ParkingLotApiTest.ControllerTest
             CarService carService = new CarService(context);
             var addParkingLotReturn = await parkingLotService.AddParkingLot(parkingLotDto1);
             await carService.AddCar(addParkingLotReturn, carDto1);
+            Assert.Equal(1, context.Cars.Count());
+        }
+
+        [Fact]
+        public async Task Should_not_add_car_when_parkingLot_full_via_service()
+        {
+            var scope = Factory.Services.CreateScope();
+            var scopedServices = scope.ServiceProvider;
+
+            ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            context.Orders.RemoveRange(context.Orders);
+            context.SaveChanges();
+            ParkingLotService parkingLotService = new ParkingLotService(context);
+            CarService carService = new CarService(context);
+            var addParkingLotReturn = await parkingLotService.AddParkingLot(parkingLotDto1);
+            await carService.AddCar(addParkingLotReturn, carDto1);
+            await carService.AddCar(addParkingLotReturn, carDto2);
             Assert.Equal(1, context.Cars.Count());
         }
 
