@@ -218,7 +218,9 @@ namespace ParkingLotApiTest.ControllerTest
             var scopedServices = scope.ServiceProvider;
 
             ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            context.ParkingLots.RemoveRange(context.ParkingLots);
             context.Orders.RemoveRange(context.Orders);
+            context.Cars.RemoveRange(context.Cars);
             context.SaveChanges();
             ParkingLotService parkingLotService = new ParkingLotService(context);
             CarService carService = new CarService(context);
@@ -234,7 +236,9 @@ namespace ParkingLotApiTest.ControllerTest
             var scopedServices = scope.ServiceProvider;
 
             ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            context.ParkingLots.RemoveRange(context.ParkingLots);
             context.Orders.RemoveRange(context.Orders);
+            context.Cars.RemoveRange(context.Cars);
             context.SaveChanges();
             ParkingLotService parkingLotService = new ParkingLotService(context);
             CarService carService = new CarService(context);
@@ -251,10 +255,39 @@ namespace ParkingLotApiTest.ControllerTest
             var scopedServices = scope.ServiceProvider;
 
             ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            context.ParkingLots.RemoveRange(context.ParkingLots);
             context.Orders.RemoveRange(context.Orders);
+            context.Cars.RemoveRange(context.Cars);
             context.SaveChanges();
+            ParkingLotService parkingLotService = new ParkingLotService(context);
+            CarService carService = new CarService(context);
             OrderService orderService = new OrderService(context);
-            await orderService.AddOrder(orderDto1);
+            var name = await parkingLotService.AddParkingLot(parkingLotDto1);
+            //await carService.AddCar(name, carDto1);
+             var orderReturn = await orderService.AddOrder(orderDto1);
+            Assert.Equal(1, context.Orders.Count());
+        }
+
+        [Fact]
+        public async Task Should_not_create_order_when_parkingLot_is_full_via_service()
+        {
+            var scope = Factory.Services.CreateScope();
+            var scopedServices = scope.ServiceProvider;
+
+            ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            context.ParkingLots.RemoveRange(context.ParkingLots);
+            context.Orders.RemoveRange(context.Orders);
+            context.Cars.RemoveRange(context.Cars);
+            context.SaveChanges();
+            ParkingLotService parkingLotService = new ParkingLotService(context);
+            OrderService orderService = new OrderService(context);
+            CarService carService = new CarService(context);
+
+            var name = await parkingLotService.AddParkingLot(parkingLotDto1);
+            var orderNumber1 = await orderService.AddOrder(orderDto1);
+            await carService.AddCar(name, carDto1);
+            Assert.Equal(1, context.Orders.Count());
+            var orderNumber2 = await orderService.AddOrder(orderDto2);
             Assert.Equal(1, context.Orders.Count());
         }
 
@@ -267,11 +300,13 @@ namespace ParkingLotApiTest.ControllerTest
             ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
             context.Orders.RemoveRange(context.Orders);
             context.SaveChanges();
+            ParkingLotService parkingLotService = new ParkingLotService(context);
             OrderService orderService = new OrderService(context);
-            UpdateOrderDto updateOrderDto = new UpdateOrderDto("Closed");
+            parkingLotService.AddParkingLot(parkingLotDto1);
+            UpdateOrderDto updateOrderDto = new UpdateOrderDto("closed");
             var addOrderNumber = await orderService.AddOrder(orderDto1);
-            await orderService.UpdateOrder(addOrderNumber, updateOrderDto);
-            Assert.Equal(1, context.Orders.Count());
+            var orderDto = await orderService.UpdateOrder(addOrderNumber, updateOrderDto);
+            Assert.Equal("closed", orderDto.OrderStatus);
         }
 
         [Fact]

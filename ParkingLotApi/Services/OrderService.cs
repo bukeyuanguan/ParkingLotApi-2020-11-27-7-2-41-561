@@ -19,16 +19,25 @@ namespace ParkingLotApi.Services
 
         public async Task<string> AddOrder(OrderDto orderDto)
         {
-            OrderEntity newOrderEntity = new OrderEntity(orderDto);
-            var isNameExist = this.parkingLotDbContext.Orders.Any(orderEntity => orderEntity.OrderNumber == newOrderEntity.OrderNumber);
-            if (isNameExist)
+            var foundParkingLotEntity = await this.parkingLotDbContext.ParkingLots
+                .Include(parkingLot => parkingLot.Cars)
+                .Include(parkingLot => parkingLot.Orders)
+                .FirstOrDefaultAsync(parkingLotEntity => parkingLotEntity.Name == orderDto.ParkingLotName);
+            if (foundParkingLotEntity != null)
             {
-                return string.Empty;
+                var leftPosition = foundParkingLotEntity.Capacity - this.parkingLotDbContext.Cars.Count();
+                if (leftPosition > 0)
+                {
+                    OrderEntity newOrderEntity = new OrderEntity(orderDto);
+                    await this.parkingLotDbContext.Orders.AddAsync(newOrderEntity);
+                    await this.parkingLotDbContext.SaveChangesAsync();
+                    return newOrderEntity.OrderNumber;
+                }
+
+                return "The parking lot is full.";
             }
 
-            await this.parkingLotDbContext.Orders.AddAsync(newOrderEntity);
-            await this.parkingLotDbContext.SaveChangesAsync();
-            return newOrderEntity.OrderNumber;
+            return "The parking lot is not exist.";
         }
 
         public async Task<OrderDto> UpdateOrder(string orderNumber, UpdateOrderDto updateOrderDto)
