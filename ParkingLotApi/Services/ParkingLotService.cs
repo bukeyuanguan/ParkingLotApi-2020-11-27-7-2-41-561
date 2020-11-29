@@ -34,7 +34,7 @@ namespace ParkingLotApi.Services
                 .FirstOrDefaultAsync(parkingLotEntity => parkingLotEntity.Name == name);
             return new ParkingLotDto(foundParkingLotEntity);
         }
-
+        
         public async Task<string> AddParkingLot(ParkingLotDto parkingLotDto)
         {
             ParkingLotEntity parkingLotEntity = new ParkingLotEntity(parkingLotDto);
@@ -42,6 +42,16 @@ namespace ParkingLotApi.Services
             await this.parkingLotDbContext.ParkingLots.AddAsync(parkingLotEntity);
             await this.parkingLotDbContext.SaveChangesAsync();
             return parkingLotEntity.Name;
+        }
+
+        public async Task<ParkingLotDto> UpdateParkingLot(string name, UpdateParkingLotDto updateParkingLotDto)
+        {
+            var foundParkingLotEntity = await this.parkingLotDbContext.ParkingLots
+                .Include(parkingLot => parkingLot.Cars)
+                .Include(parkingLot => parkingLot.Orders)
+                .FirstOrDefaultAsync(parkingLotEntity => parkingLotEntity.Name == name);
+            foundParkingLotEntity.Capacity = updateParkingLotDto.Capacity;
+            return new ParkingLotDto(foundParkingLotEntity);
         }
 
         public async Task DeleteParkingLot(string name)

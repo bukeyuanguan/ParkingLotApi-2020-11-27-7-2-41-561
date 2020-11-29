@@ -39,8 +39,16 @@ namespace ParkingLotApi.Controllers
         public async Task<ActionResult<ParkingLotDto>> Add(ParkingLotDto parkingLotDto)
         {
             var name = await this.parkingLotService.AddParkingLot(parkingLotDto);
-            //return CreatedAtAction(nameof(GetByName), new { name = name }, parkingLotDto);
-            return parkingLotDto;
+            return CreatedAtAction(nameof(GetByName), new { name = name }, parkingLotDto);
+            //return parkingLotDto;
+        }
+
+        [HttpPatch("{name}")]
+        public async Task<ActionResult<ParkingLotDto>> UpdateByName(string name, UpdateParkingLotDto updateParkingLotDto)
+        {
+            var parkingLotDto = await this.parkingLotService.UpdateParkingLot(name, updateParkingLotDto);
+            return CreatedAtAction(nameof(GetByName), new { name = name }, parkingLotDto);
+            //return NoContent();
         }
 
         [HttpDelete("{name}")]

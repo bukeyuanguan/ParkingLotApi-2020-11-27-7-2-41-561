@@ -16,6 +16,7 @@ namespace ParkingLotApi.Entities
         {
             this.Name = parkingLotDto.Name;
             this.Locatoin = parkingLotDto.Locatoin;
+            this.Capacity = parkingLotDto.Capacity;
             this.Cars = parkingLotDto.Cars.Select(carDto => new CarEntity(carDto)).ToList();
             this.Orders = parkingLotDto.Orders.Select(orderDto => new OrderEntity(orderDto)).ToList();
         }
