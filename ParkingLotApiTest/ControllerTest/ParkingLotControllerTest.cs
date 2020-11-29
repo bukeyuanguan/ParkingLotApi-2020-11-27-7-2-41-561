@@ -154,6 +154,22 @@ namespace ParkingLotApiTest.ControllerTest
         }
 
         [Fact]
+        public async Task Should_get_all_parkingLots_Via_Service()
+        {
+            var scope = Factory.Services.CreateScope();
+            var scopedServices = scope.ServiceProvider;
+
+            ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            ParkingLotService parkingLotService = new ParkingLotService(context);
+            context.ParkingLots.RemoveRange(context.ParkingLots);
+            context.SaveChanges();
+            var addReturn1 = await parkingLotService.AddParkingLot(parkingLotDto1);
+            var addReturn2 = await parkingLotService.AddParkingLot(parkingLotDto2);
+            var getAllReturn = await parkingLotService.GetAll();
+            Assert.Equal(2, getAllReturn.Count);
+        }
+
+        [Fact]
         public async Task Should_add_new_parkingLot_when_add()
         {
             var request = JsonConvert.SerializeObject(parkingLotDto1);
