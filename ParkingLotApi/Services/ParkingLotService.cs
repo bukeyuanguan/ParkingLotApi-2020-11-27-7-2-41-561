@@ -46,6 +46,11 @@ namespace ParkingLotApi.Services
                 .Include(parkingLot => parkingLot.Cars)
                 .Include(parkingLot => parkingLot.Orders)
                 .FirstOrDefaultAsync(parkingLotEntity => parkingLotEntity.Name == name);
+            if (foundParkingLotEntity == null)
+            {
+                return null;
+            }
+
             foundParkingLotEntity.Capacity = updateParkingLotDto.Capacity;
             return new ParkingLotDto(foundParkingLotEntity);
         }

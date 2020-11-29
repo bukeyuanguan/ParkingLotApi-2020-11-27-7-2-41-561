@@ -170,6 +170,22 @@ namespace ParkingLotApiTest.ControllerTest
         }
 
         [Fact]
+        public async Task Should_get_x_parkingLots_for_page_y_Via_Service()
+        {
+            var scope = Factory.Services.CreateScope();
+            var scopedServices = scope.ServiceProvider;
+
+            ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            ParkingLotService parkingLotService = new ParkingLotService(context);
+            context.ParkingLots.RemoveRange(context.ParkingLots);
+            context.SaveChanges();
+            var addReturn1 = await parkingLotService.AddParkingLot(parkingLotDto1);
+            var addReturn2 = await parkingLotService.AddParkingLot(parkingLotDto2);
+            var getAllReturn = await parkingLotService.GetByPageSizeAndIndex(1, 1);
+            Assert.Equal(1, getAllReturn.Count);
+        }
+
+        [Fact]
         public async Task Should_add_new_parkingLot_when_add()
         {
             var request = JsonConvert.SerializeObject(parkingLotDto1);
@@ -273,29 +289,6 @@ namespace ParkingLotApiTest.ControllerTest
             var response = await client.GetAsync($"/parkingLots/{parkingLotName}");
             //then
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task Should_return_parkingLots_when_get_by_pageSize_and_pageIndex()
-        {
-            //given
-            this.client.DeleteAsync("/parkingLots/clear");
-            var request1 = JsonConvert.SerializeObject(parkingLotDto1);
-            var request2 = JsonConvert.SerializeObject(parkingLotDto2);
-            StringContent requestBody1 = new StringContent(request1, Encoding.UTF8, "application/json");
-            StringContent requestBody2 = new StringContent(request2, Encoding.UTF8, "application/json");
-            var response1 = await client.PostAsync("/parkingLots", requestBody1);
-            var response2 = await client.PostAsync("/parkingLots", requestBody2);
-            //when
-            var response = await client.GetAsync("/parkingLots?pageSize=1&pageIndex=1");
-            //var response = await client.GetAsync($"/parkingLots");
-            var responseBody = await response.Content.ReadAsStringAsync();
-            List<ParkingLotDto> respondParkingLot = JsonConvert.DeserializeObject<List<ParkingLotDto>>(responseBody);
-            //then
-            var parkingLotDto2String = JsonConvert.SerializeObject(parkingLotDto2);
-            var respondParkingLotString = JsonConvert.SerializeObject(respondParkingLot[0]);
-            Assert.Equal(1, respondParkingLot.Count);
-            //Assert.Equal(2, respondParkingLot.Count);
         }
     }
 }

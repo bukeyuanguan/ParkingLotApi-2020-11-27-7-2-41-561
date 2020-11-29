@@ -60,7 +60,12 @@ namespace ParkingLotApi.Controllers
         public async Task<ActionResult<ParkingLotDto>> UpdateByName(string name, UpdateParkingLotDto updateParkingLotDto)
         {
             var parkingLotDto = await this.parkingLotService.UpdateParkingLot(name, updateParkingLotDto);
-           // return CreatedAtAction(nameof(GetByName), new { name = name }, parkingLotDto);
+            // return CreatedAtAction(nameof(GetByName), new { name = name }, parkingLotDto);
+            if (parkingLotDto == null)
+            {
+                return NotFound();
+            }
+
             return Ok(parkingLotDto);
         }
 
