@@ -106,6 +106,23 @@ namespace ParkingLotApiTest.ControllerTest
         }
 
         [Fact]
+        public async Task Should_get_parkingLot_Successfully_by_name_Via_Service()
+        {
+            var scope = Factory.Services.CreateScope();
+            var scopedServices = scope.ServiceProvider;
+
+            ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            context.ParkingLots.RemoveRange(context.ParkingLots);
+            context.SaveChanges();
+            ParkingLotService parkingLotService = new ParkingLotService(context);
+            await parkingLotService.AddParkingLot(parkingLotDto1);
+            var getByName = await parkingLotService.GetByName("IBM");
+            var parkingLotDto1String = JsonConvert.SerializeObject(parkingLotDto1);
+            var getByNameString = JsonConvert.SerializeObject(getByName);
+            Assert.Equal(parkingLotDto1String, getByNameString);
+        }
+
+        [Fact]
         public async Task Should_Delete_Company_Successfully_Via_Service()
         {
             var scope = Factory.Services.CreateScope();
@@ -149,7 +166,6 @@ namespace ParkingLotApiTest.ControllerTest
             var parkingLotDtoString = JsonConvert.SerializeObject(parkingLotDto1);
             var respondParkingLotString = JsonConvert.SerializeObject(respondParkingLot);
             Assert.Equal(parkingLotDtoString, respondParkingLotString);
-            //Assert.Equal(parkingLotDto, respondParkingLot);
         }
 
         [Fact]
