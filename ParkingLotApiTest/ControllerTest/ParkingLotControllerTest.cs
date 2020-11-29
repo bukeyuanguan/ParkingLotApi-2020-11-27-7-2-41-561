@@ -18,6 +18,8 @@ namespace ParkingLotApiTest.ControllerTest
     {
         private ParkingLotDto parkingLotDto1;
         private ParkingLotDto parkingLotDto2;
+        private OrderDto orderDto1;
+        private OrderDto orderDto2;
         private HttpClient client;
         public ParkingLotControllerTest(CustomWebApplicationFactory<Startup> factory) : base(factory)
         {
@@ -30,30 +32,10 @@ namespace ParkingLotApiTest.ControllerTest
             parkingLotDto1.Capacity = 20;
             parkingLotDto1.Cars = new List<CarDto>()
             {
-                new CarDto()
-                {
-                    PlateNumber = "kN5032",
-                },
             };
 
             parkingLotDto1.Orders = new List<OrderDto>()
             {
-                new OrderDto()
-                {
-                    OrderNumber = "1234",
-                    ParkingLotName = "IBM",
-                    CreationTime = "2020-11-17 13:15:30",
-                    CloseTime = "2020-11-17 17:15:30",
-                    OrderStatus = true,
-                },
-                new OrderDto()
-                {
-                    OrderNumber = "5678",
-                    ParkingLotName = "IBM",
-                    CreationTime = "2020-12-17 14:15:30",
-                    CloseTime = "2020-12-17 15:15:30",
-                    OrderStatus = true,
-                },
             };
             ParkingLotDto parkingLotDto2 = new ParkingLotDto();
             parkingLotDto2.Name = "SUN";
@@ -61,34 +43,34 @@ namespace ParkingLotApiTest.ControllerTest
             parkingLotDto1.Capacity = 30;
             parkingLotDto2.Cars = new List<CarDto>()
             {
-                new CarDto()
-                {
-                    PlateNumber = "kY5032",
-                },
             };
-
             parkingLotDto2.Orders = new List<OrderDto>()
             {
-                new OrderDto()
-                {
-                    OrderNumber = "1234",
-                    ParkingLotName = "SUN",
-                    CreationTime = "2020-12-17 13:15:30",
-                    CloseTime = "2020-12-18 17:15:30",
-                    OrderStatus = true,
-                },
-                new OrderDto()
-                {
-                    OrderNumber = "5678",
-                    ParkingLotName = "SUN",
-                    CreationTime = "2020-10-17 14:15:30",
-                    CloseTime = "2020-10-17 15:15:30",
-                    OrderStatus = false,
-                },
+            };
+
+            var orderDto1 = new OrderDto()
+            {
+                OrderNumber = "1234",
+                ParkingLotName = "IBM",
+                PlateNumber = "KN3456",
+                CreationTime = "2020-11-17 13:15:30",
+                CloseTime = "2020-11-17 17:15:30",
+                OrderStatus = true,
+            };
+            var orderDto2 = new OrderDto()
+            {
+                OrderNumber = "5678",
+                ParkingLotName = "IBM",
+                PlateNumber = "JN8956",
+                CreationTime = "2020-12-17 14:15:30",
+                CloseTime = "2020-12-17 15:15:30",
+                OrderStatus = true,
             };
 
             this.parkingLotDto1 = parkingLotDto1;
             this.parkingLotDto2 = parkingLotDto2;
+            this.orderDto1 = orderDto1;
+            this.orderDto2 = orderDto2;
         }
 
         [Fact]
@@ -110,13 +92,13 @@ namespace ParkingLotApiTest.ControllerTest
         //{
         //    var scope = Factory.Services.CreateScope();
         //    var scopedServices = scope.ServiceProvider;
-
         //    ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
         //    context.ParkingLots.RemoveRange(context.ParkingLots);
         //    context.SaveChanges();
         //    ParkingLotService parkingLotService = new ParkingLotService(context);
+        //    await parkingLotService.DeleteAllParkingLot();
         //    await parkingLotService.AddParkingLot(parkingLotDto1);
-        //    await parkingLotService.AddParkingLot(parkingLotDto1);
+        //    //await parkingLotService.AddParkingLot(parkingLotDto1);
         //    Assert.Equal(1, context.ParkingLots.Count());
         //}
 
@@ -215,6 +197,20 @@ namespace ParkingLotApiTest.ControllerTest
             var addReturn2 = await parkingLotService.AddParkingLot(parkingLotDto2);
             var getAllReturn = await parkingLotService.GetByPageSizeAndIndex(1, 1);
             Assert.Equal(1, getAllReturn.Count);
+        }
+
+        [Fact]
+        public async Task Should_add_order_successfully_via_service()
+        {
+            var scope = Factory.Services.CreateScope();
+            var scopedServices = scope.ServiceProvider;
+
+            ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            context.Orders.RemoveRange(context.Orders);
+            context.SaveChanges();
+            OrderService orderService = new OrderService(context);
+            await orderService.AddOrder(orderDto1);
+            Assert.Equal(1, context.Orders.Count());
         }
 
         [Fact]

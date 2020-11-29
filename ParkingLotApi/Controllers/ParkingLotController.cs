@@ -16,9 +16,32 @@ namespace ParkingLotApi.Controllers
     public class ParkingLotController : ControllerBase
     {
         private readonly ParkingLotService parkingLotService;
-        public ParkingLotController(ParkingLotService parkingLotService)
+        private readonly OrderService orderService;
+        public ParkingLotController(ParkingLotService parkingLotService, OrderService orderService)
         {
             this.parkingLotService = parkingLotService;
+            this.orderService = orderService;
+        }
+
+        [HttpDelete("clear")]
+        public async Task<ActionResult> DeleteAll()
+        {
+            await this.parkingLotService.DeleteAllParkingLot();
+
+            return this.NoContent();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<ParkingLotDto>> Add(ParkingLotDto parkingLotDto)
+        {
+            var name = await this.parkingLotService.AddParkingLot(parkingLotDto);
+            if (name == string.Empty)
+            {
+                return Conflict();
+            }
+
+            return CreatedAtAction(nameof(GetByName), new { name = name }, parkingLotDto);
+            //return parkingLotDto;
         }
 
         [HttpGet("{name}")]
@@ -48,19 +71,6 @@ namespace ParkingLotApi.Controllers
             return Ok(parkingLotsList);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<ParkingLotDto>> Add(ParkingLotDto parkingLotDto)
-        {
-            var name = await this.parkingLotService.AddParkingLot(parkingLotDto);
-            if (name == string.Empty)
-            {
-                return Conflict();
-            }
-
-            return CreatedAtAction(nameof(GetByName), new { name = name }, parkingLotDto);
-            //return parkingLotDto;
-        }
-
         [HttpPatch("{name}")]
         public async Task<ActionResult<ParkingLotDto>> UpdateByName(string name, UpdateParkingLotDto updateParkingLotDto)
         {
@@ -81,12 +91,17 @@ namespace ParkingLotApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("clear")]
-        public async Task<ActionResult> DeleteAll()
+        [HttpPost("{name}/orders")]
+        public async Task<ActionResult<ParkingLotDto>> AddOrder(OrderDto orderLotDto)
         {
-            await this.parkingLotService.DeleteAllParkingLot();
+            var orderNumber = await this.orderService.AddOrder(orderLotDto);
+            if (orderNumber == string.Empty)
+            {
+                return Conflict();
+            }
 
-            return this.NoContent();
+            return CreatedAtAction(nameof(GetByName), new { orderNumber = orderNumber }, orderLotDto);
+            //return parkingLotDto;
         }
     }
 }
