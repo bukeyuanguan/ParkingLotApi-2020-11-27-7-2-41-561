@@ -1,4 +1,5 @@
-﻿using ParkingLotApi.Dtos;
+﻿using Microsoft.EntityFrameworkCore;
+using ParkingLotApi.Dtos;
 using ParkingLotApi.Entities;
 using ParkingLotApi.Repository;
 using System;
@@ -28,6 +29,18 @@ namespace ParkingLotApi.Services
             await this.parkingLotDbContext.Orders.AddAsync(newOrderEntity);
             await this.parkingLotDbContext.SaveChangesAsync();
             return newOrderEntity.OrderNumber;
+        }
+
+        public async Task<OrderDto> UpdateOrder(string orderNumber, UpdateOrderDto updateOrderDto)
+        {
+            var foundOrderEntity = await this.parkingLotDbContext.Orders.FirstOrDefaultAsync(orderEntity => orderEntity.OrderNumber == orderNumber);
+            if (foundOrderEntity == null)
+            {
+                return null;
+            }
+
+            foundOrderEntity.OrderStatus = updateOrderDto.OrderStatus;
+            return new OrderDto(foundOrderEntity);
         }
     }
 }

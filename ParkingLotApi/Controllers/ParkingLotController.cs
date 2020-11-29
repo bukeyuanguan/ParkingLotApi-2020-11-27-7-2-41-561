@@ -56,20 +56,20 @@ namespace ParkingLotApi.Controllers
             return Ok(parkingLotDto);
         }
 
-        //[HttpGet]
-        //public async Task<ActionResult<List<ParkingLotDto>>> GetAll()
-        //{
-        //    var parkingLotDto = await this.parkingLotService.GetAll();
-        //    return Ok(parkingLotDto);
-        //}
-
         [HttpGet]
-        public async Task<ActionResult<List<ParkingLotDto>>> GetXParkingLotsInPageY(int? pageSize, int? pageIndex)
+        public async Task<ActionResult<List<ParkingLotDto>>> GetAll()
         {
-            //var parkingLotDto = await this.parkingLotService.GetByName("IBM");
-            var parkingLotsList = await this.parkingLotService.GetByPageSizeAndIndex(pageSize, pageIndex);
-            return Ok(parkingLotsList);
+            var parkingLotDto = await this.parkingLotService.GetAll();
+            return Ok(parkingLotDto);
         }
+
+        //[HttpGet]
+        //public async Task<ActionResult<List<ParkingLotDto>>> GetXParkingLotsInPageY(int? pageSize, int? pageIndex)
+        //{
+        //    //var parkingLotDto = await this.parkingLotService.GetByName("IBM");
+        //    var parkingLotsList = await this.parkingLotService.GetByPageSizeAndIndex(pageSize, pageIndex);
+        //    return Ok(parkingLotsList);
+        //}
 
         [HttpPatch("{name}")]
         public async Task<ActionResult<ParkingLotDto>> UpdateByName(string name, UpdateParkingLotDto updateParkingLotDto)

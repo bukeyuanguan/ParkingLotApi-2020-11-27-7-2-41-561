@@ -55,7 +55,7 @@ namespace ParkingLotApiTest.ControllerTest
                 PlateNumber = "KN3456",
                 CreationTime = "2020-11-17 13:15:30",
                 CloseTime = "2020-11-17 17:15:30",
-                OrderStatus = true,
+                OrderStatus = "open",
             };
             var orderDto2 = new OrderDto()
             {
@@ -64,7 +64,7 @@ namespace ParkingLotApiTest.ControllerTest
                 PlateNumber = "JN8956",
                 CreationTime = "2020-12-17 14:15:30",
                 CloseTime = "2020-12-17 15:15:30",
-                OrderStatus = true,
+                OrderStatus = "open",
             };
 
             this.parkingLotDto1 = parkingLotDto1;
@@ -200,7 +200,7 @@ namespace ParkingLotApiTest.ControllerTest
         }
 
         [Fact]
-        public async Task Should_add_order_successfully_via_service()
+        public async Task Should_create_order_successfully_when_position_available_via_service()
         {
             var scope = Factory.Services.CreateScope();
             var scopedServices = scope.ServiceProvider;
@@ -210,6 +210,22 @@ namespace ParkingLotApiTest.ControllerTest
             context.SaveChanges();
             OrderService orderService = new OrderService(context);
             await orderService.AddOrder(orderDto1);
+            Assert.Equal(1, context.Orders.Count());
+        }
+
+        [Fact]
+        public async Task Should_update_order_status_to_close_when_car_left_via_service()
+        {
+            var scope = Factory.Services.CreateScope();
+            var scopedServices = scope.ServiceProvider;
+
+            ParkingLotDbContext context = scopedServices.GetRequiredService<ParkingLotDbContext>();
+            context.Orders.RemoveRange(context.Orders);
+            context.SaveChanges();
+            OrderService orderService = new OrderService(context);
+            UpdateOrderDto updateOrderDto = new UpdateOrderDto("Closed");
+            var addOrderNumber = await orderService.AddOrder(orderDto1);
+            await orderService.UpdateOrder(addOrderNumber, updateOrderDto);
             Assert.Equal(1, context.Orders.Count());
         }
 
@@ -259,14 +275,14 @@ namespace ParkingLotApiTest.ControllerTest
             var request2 = JsonConvert.SerializeObject(parkingLotDto2);
             StringContent requestBody1 = new StringContent(request1, Encoding.UTF8, "application/json");
             StringContent requestBody2 = new StringContent(request2, Encoding.UTF8, "application/json");
-            await client.PostAsync("/parkingLots", requestBody1);
-            await client.PostAsync("/parkingLots", requestBody2);
+            var addReturn1 = await client.PostAsync("/parkingLots", requestBody1);
+            //var addReturn2 = await client.PostAsync("/parkingLots", requestBody2);
             //when
-            var response = await client.GetAsync($"/parkingLots");
+            var response = await client.GetAsync("/parkingLots");
             var responseBody = await response.Content.ReadAsStringAsync();
             List<ParkingLotDto> respondParkingLot = JsonConvert.DeserializeObject<List<ParkingLotDto>>(responseBody);
             //then
-            Assert.Equal(2, respondParkingLot.Count);
+            Assert.Equal(1, respondParkingLot.Count);
         }
 
         //[Fact]

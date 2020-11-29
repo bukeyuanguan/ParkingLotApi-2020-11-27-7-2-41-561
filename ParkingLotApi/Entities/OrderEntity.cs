@@ -28,6 +28,6 @@ namespace ParkingLotApi.Entities
         public string PlateNumber { get; set; }
         public string CreationTime { get; set; }
         public string CloseTime { get; set; }
-        public bool OrderStatus { get; set; }
+        public string OrderStatus { get; set; }
     }
 }

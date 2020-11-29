@@ -27,7 +27,7 @@ namespace ParkingLotApi.Dtos
         public string PlateNumber { get; set; }
         public string CreationTime { get; set; }
         public string CloseTime { get; set; }
-        public bool OrderStatus { get; set; }
+        public string OrderStatus { get; set; }
         public override bool Equals(object obj)
         {
             if (!(obj is OrderDto))

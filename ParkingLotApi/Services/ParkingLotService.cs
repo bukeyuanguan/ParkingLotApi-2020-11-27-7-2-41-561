@@ -20,9 +20,7 @@ namespace ParkingLotApi.Services
 
         public async Task<List<ParkingLotDto>> GetAll()
         {
-            var parkingLots = await this.parkingLotDbContext.ParkingLots
-                .Include(parkingLot => parkingLot.Cars)
-                .Include(parkingLot => parkingLot.Orders).ToListAsync();
+            var parkingLots = await this.parkingLotDbContext.ParkingLots.ToListAsync();
             return parkingLots.Select(parkingLotEntity => new ParkingLotDto(parkingLotEntity)).ToList();
         }
 
